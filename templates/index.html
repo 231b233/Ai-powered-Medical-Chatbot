@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Powered Medical Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #1e293b;
+        }
+
+        /* Professional slate-800 */
+        .glass-panel {
+            background: rgba(51, 65, 85, 0.7);
+            /* slate-700 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .markdown-body {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1em;
+        }
+
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3 {
+            color: #f8fafc;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+
+        .markdown-body ul {
+            list-style-type: disc;
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+        }
+
+        .markdown-body strong {
+            color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border-left-color: #fff;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-slate-300 font-sans selection:bg-indigo-500/30">
+
+    <div class="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <div
+                class="inline-flex items-center justify-center p-3 bg-indigo-500/10 rounded-2xl mb-6 border border-indigo-500/20">
+                <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                    </path>
+                </svg>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-3">AI Powered Medical Chatbot</h1>
+            <p class="text-slate-400 max-w-2xl mx-auto text-lg">AI-powered system for disease prediction and basic
+                health assistance.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+
+            <!-- Left Column: Input -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- Upload Section -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl">
+                    <div class="flex items-center mb-5">
+                        <svg class="w-5 h-5 text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        <h2 class="text-lg font-medium text-slate-100">Image Source</h2>
+                    </div>
+
+                    <div class="relative group cursor-pointer" id="upload-zone">
+                        <div
+                            class="absolute inset-0 bg-indigo-500/5 rounded-xl border-2 border-dashed border-indigo-500/30 group-hover:border-indigo-400/50 group-hover:bg-indigo-500/10 transition-all duration-300">
+                        </div>
+                        <div class="relative p-8 text-center flex flex-col items-center justify-center min-h-[200px]">
+                            <button id="upload-btn"
+                                class="mb-3 p-3 bg-slate-800 rounded-full shadow-lg border border-slate-700 text-indigo-400 group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </button>
+                            <p class="text-sm font-medium text-slate-300">Click to browse or drag image here</p>
+                            <p class="text-xs text-slate-500 mt-2">Supports JPG, PNG, DICOM (converted)</p>
+                        </div>
+                    </div>
+
+                    <input type="file" id="image-upload" accept="image/*" class="hidden" />
+
+                    <div id="image-container"
+                        class="hidden mt-6 relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
+                        <img id="display-image" src="" alt="Uploaded scan"
+                            class="w-full h-auto object-contain max-h-[300px]" />
+                        <div
+                            class="absolute top-2 right-2 bg-slate-900/80 backdrop-blur px-2 py-1 rounded text-xs font-medium text-slate-300 border border-slate-700">
+                            Preview</div>
+                    </div>
+                </div>
+
+                <!-- Query Section -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl">
+                    <div class="flex items-center mb-5">
+                        <svg class="w-5 h-5 text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+                            </path>
+                        </svg>
+                        <h2 class="text-lg font-medium text-slate-100">Clinical Query</h2>
+                    </div>
+
+                    <textarea id="query-input" rows="4"
+                        placeholder="E.g., Please identify any abnormalities in this chest X-ray..."
+                        class="w-full p-4 bg-slate-900/50 text-slate-200 rounded-xl border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all resize-none shadow-inner placeholder-slate-500"></textarea>
+
+                    <button id="submit-query"
+                        class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 px-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98] flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span id="btn-text">Analyze Image</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="lg:col-span-7 flex flex-col h-full">
+                <div
+                    class="glass-panel rounded-2xl p-6 shadow-xl flex-grow border-t-4 border-t-indigo-500 flex flex-col">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-700/50">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-indigo-400 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <h2 class="text-lg font-medium text-slate-100">Analysis Result</h2>
+                        </div>
+                    </div>
+
+                    <div id="empty-state"
+                        class="flex-grow flex flex-col items-center justify-center text-slate-500 py-12">
+                        <svg class="w-16 h-16 mb-4 text-slate-700" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        <p>Upload an image and submit a query to see the analysis here.</p>
+                    </div>
+
+                    <div id="response-container-llama11b"
+                        class="hidden markdown-body flex-grow overflow-y-auto pr-2 custom-scrollbar"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Error Alert -->
+        <div id="error-container"
+            class="hidden max-w-2xl mx-auto mt-6 bg-red-900/30 border border-red-500/30 rounded-xl p-4 flex items-start shadow-lg">
+            <svg class="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                <h3 class="text-sm font-medium text-red-400">Error processing request</h3>
+                <p id="error-text" class="mt-1 text-sm text-red-200/80"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const uploadBtn = document.getElementById('upload-btn');
+            const uploadZone = document.getElementById('upload-zone');
+            const imageUpload = document.getElementById('image-upload');
+            const displayImage = document.getElementById('display-image');
+            const imageContainer = document.getElementById('image-container');
+            const queryInput = document.getElementById('query-input');
+            const submitQuery = document.getElementById('submit-query');
+            const btnText = document.getElementById('btn-text');
+            const responseLlama = document.getElementById('response-container-llama11b');
+            const emptyState = document.getElementById('empty-state');
+            const errorContainer = document.getElementById('error-container');
+            const errorText = document.getElementById('error-text');
+
+            // Click triggers
+            const triggerUpload = () => imageUpload.click();
+            uploadBtn.addEventListener('click', (e) => { e.stopPropagation(); triggerUpload(); });
+            uploadZone.addEventListener('click', triggerUpload);
+
+            // Display uploaded image
+            imageUpload.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        displayImage.src = e.target.result;
+                        imageContainer.classList.remove('hidden');
+                        uploadZone.classList.add('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Submit Query
+            submitQuery.addEventListener('click', async () => {
+                const image = imageUpload.files[0];
+                const query = queryInput.value.trim();
+
+                if (!image) {
+                    showError('Please select an image to analyze.');
+                    return;
+                }
+                if (!query) {
+                    showError('Please enter a clinical query for the analysis.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('image', image);
+                formData.append('query', query);
+
+                try {
+                    submitQuery.disabled = true;
+                    btnText.innerHTML = '<div class="spinner"></div> Processing...';
+                    errorContainer.classList.add('hidden');
+
+                    // Reset response area
+                    responseLlama.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+
+                    const response = await fetch('/upload_and_query', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.detail || 'An error occurred while processing your request.');
+                    }
+
+                    emptyState.classList.add('hidden');
+                    responseLlama.innerHTML = marked.parse(result.llama);
+                    responseLlama.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    showError(error.message);
+                } finally {
+                    submitQuery.disabled = false;
+                    btnText.textContent = 'Analyze Image';
+                }
+            });
+
+            function showError(message) {
+                errorText.textContent = message;
+                errorContainer.classList.remove('hidden');
+            }
+        });
+    </script>
+
+    <style>
+        /* Custom scrollbar for results area */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.8);
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.8);
+        }
+    </style>
+</body>
+
+</html>
