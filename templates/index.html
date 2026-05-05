@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Powered Medical Chatbot</title>
+    <title>AI Powered Medical Analyzer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -17,9 +17,10 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        slate: {
-                            850: '#151e2e',
-                            900: '#0f172a',
+                        brand: {
+                            dark: '#0f172a',
+                            light: '#f8fafc',
+                            border: '#e2e8f0',
                         }
                     }
                 }
@@ -28,228 +29,243 @@
     </script>
     <style>
         body {
-            background-color: #1e293b;
+            background-color: #f8fafc;
+            color: #334155;
+            min-height: 100vh;
         }
 
-        /* Professional slate-800 */
-        .glass-panel {
-            background: rgba(51, 65, 85, 0.7);
-            /* slate-700 */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .white-panel {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
-        .markdown-body {
-            color: #cbd5e1;
-            font-size: 0.95rem;
-            line-height: 1.6;
+        .tab-btn {
+            transition: all 0.2s ease;
         }
 
-        .markdown-body p {
-            margin-bottom: 1em;
-        }
-
-        .markdown-body h1,
-        .markdown-body h2,
-        .markdown-body h3 {
-            color: #f8fafc;
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
+        .tab-btn.active {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-bottom: 2px solid #0f172a;
             font-weight: 600;
         }
 
-        .markdown-body ul {
-            list-style-type: disc;
-            padding-left: 1.5em;
-            margin-bottom: 1em;
+        .ml-card {
+            background: #f8fafc;
+            border-left: 4px solid #475569;
+            border-radius: 6px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border-right: 1px solid #e2e8f0;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        .markdown-body strong {
-            color: #f1f5f9;
-            font-weight: 600;
+        .ai-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1.5rem;
         }
 
         .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(15, 23, 42, 0.1);
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            border-left-color: #fff;
+            border-left-color: #0f172a;
             animation: spin 1s linear infinite;
             display: inline-block;
             vertical-align: middle;
             margin-right: 8px;
         }
 
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .markdown-body { color: #334155; line-height: 1.7; font-size: 0.95rem; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            color: #0f172a; font-weight: 600; margin-top: 1.5em; margin-bottom: 0.75em; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.3em;
+        }
+        .markdown-body p { margin-bottom: 1em; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .markdown-body strong { color: #0f172a; font-weight: 600; }
+        
+        .custom-input {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+        }
+        .custom-input:focus {
+            border-color: #0f172a;
+            box-shadow: 0 0 0 1px #0f172a;
         }
     </style>
 </head>
 
-<body class="min-h-screen text-slate-300 font-sans selection:bg-indigo-500/30">
+<body class="font-sans selection:bg-slate-200">
 
-    <div class="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
 
         <!-- Header -->
-        <header class="text-center mb-16">
-            <div
-                class="inline-flex items-center justify-center p-3 bg-indigo-500/10 rounded-2xl mb-6 border border-indigo-500/20">
-                <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
-                    </path>
-                </svg>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-3">AI Powered Medical Chatbot</h1>
-            <p class="text-slate-400 max-w-2xl mx-auto text-lg">AI-powered system for disease prediction and basic
-                health assistance.</p>
+        <header class="text-center mb-10 border-b border-slate-200 pb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-3">AI Powered Medical Chatbot</h1>
+            <p class="text-slate-500 max-w-2xl mx-auto text-base">A professional hybrid system combining Custom Machine Learning Models with AI-driven clinical analysis.</p>
         </header>
+
+        <!-- Tabs -->
+        <div class="flex justify-center mb-8">
+            <div class="bg-white border border-slate-200 p-1 rounded-lg inline-flex space-x-1 shadow-sm">
+                <button id="tab-image" class="tab-btn active px-6 py-2.5 rounded text-sm font-medium text-slate-600 hover:text-slate-900 transition-all">
+                     Image Analyzer
+                </button>
+                <button id="tab-text" class="tab-btn px-6 py-2.5 rounded text-sm font-medium text-slate-500 hover:text-slate-900 transition-all">
+                     Symptom Analyzer
+                </button>
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
 
             <!-- Left Column: Input -->
             <div class="lg:col-span-5 space-y-6">
+                <div class="white-panel p-6 relative overflow-hidden">
+                    
+                    <h2 class="text-lg font-semibold text-slate-900 mb-1">Step 1: Patient Data Input</h2>
+                    <p class="text-sm text-slate-500 mb-6">Supply the data for the Machine Learning model to analyze.</p>
 
-                <!-- Upload Section -->
-                <div class="glass-panel rounded-2xl p-6 shadow-xl">
-                    <div class="flex items-center mb-5">
-                        <svg class="w-5 h-5 text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                        </svg>
-                        <h2 class="text-lg font-medium text-slate-100">Image Source</h2>
-                    </div>
-
-                    <div class="relative group cursor-pointer" id="upload-zone">
-                        <div
-                            class="absolute inset-0 bg-indigo-500/5 rounded-xl border-2 border-dashed border-indigo-500/30 group-hover:border-indigo-400/50 group-hover:bg-indigo-500/10 transition-all duration-300">
+                    <!-- Image Input Section -->
+                    <div id="image-section" class="space-y-6">
+                        <div class="relative group cursor-pointer" id="upload-zone">
+                            <div class="absolute inset-0 bg-slate-50 rounded-lg border-2 border-dashed border-slate-300 group-hover:border-slate-400 group-hover:bg-slate-100 transition-all duration-300"></div>
+                            <div class="relative p-6 text-center flex flex-col items-center justify-center min-h-[160px]">
+                                <div class="mb-3 p-2 bg-white rounded shadow-sm border border-slate-200 text-slate-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                </div>
+                                <p class="text-sm font-medium text-slate-600">Click to upload medical image (X-Ray, etc.)</p>
+                            </div>
                         </div>
-                        <div class="relative p-8 text-center flex flex-col items-center justify-center min-h-[200px]">
-                            <button id="upload-btn"
-                                class="mb-3 p-3 bg-slate-800 rounded-full shadow-lg border border-slate-700 text-indigo-400 group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </button>
-                            <p class="text-sm font-medium text-slate-300">Click to browse or drag image here</p>
-                            <p class="text-xs text-slate-500 mt-2">Supports JPG, PNG, DICOM (converted)</p>
+                        <input type="file" id="image-upload" accept="image/*" class="hidden" />
+                        <div id="image-container" class="hidden relative rounded-lg overflow-hidden border border-slate-200 bg-white p-2">
+                            <img id="display-image" src="" alt="Uploaded scan" class="w-full h-auto object-contain max-h-[250px] rounded" />
                         </div>
                     </div>
 
-                    <input type="file" id="image-upload" accept="image/*" class="hidden" />
-
-                    <div id="image-container"
-                        class="hidden mt-6 relative rounded-xl overflow-hidden border border-slate-700 bg-slate-900">
-                        <img id="display-image" src="" alt="Uploaded scan"
-                            class="w-full h-auto object-contain max-h-[300px]" />
-                        <div
-                            class="absolute top-2 right-2 bg-slate-900/80 backdrop-blur px-2 py-1 rounded text-xs font-medium text-slate-300 border border-slate-700">
-                            Preview</div>
-                    </div>
-                </div>
-
-                <!-- Query Section -->
-                <div class="glass-panel rounded-2xl p-6 shadow-xl">
-                    <div class="flex items-center mb-5">
-                        <svg class="w-5 h-5 text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
-                            </path>
-                        </svg>
-                        <h2 class="text-lg font-medium text-slate-100">Clinical Query</h2>
+                    <!-- Text Input Section -->
+                    <div id="text-section" class="hidden space-y-4">
+                        <label class="block text-sm font-medium text-slate-700">Enter patient symptoms (comma separated):</label>
+                        <textarea id="symptoms-input" rows="4" placeholder="E.g., fever, cough, headache, dizziness..." class="w-full p-3 custom-input rounded-lg outline-none transition-all resize-none"></textarea>
+                        <p class="text-xs text-slate-500">The model will process these features to predict the underlying disease.</p>
                     </div>
 
-                    <textarea id="query-input" rows="4"
-                        placeholder="E.g., Please identify any abnormalities in this chest X-ray..."
-                        class="w-full p-4 bg-slate-900/50 text-slate-200 rounded-xl border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all resize-none shadow-inner placeholder-slate-500"></textarea>
+                    <!-- Common Query Input -->
+                    <div class="mt-6 border-t border-slate-100 pt-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Ask the AI Doctor a question:</label>
+                        <input type="text" id="query-input" placeholder="E.g., What are the recommended treatment options?" class="w-full p-3 custom-input rounded-lg outline-none transition-all">
+                    </div>
 
-                    <button id="submit-query"
-                        class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 px-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98] flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed">
-                        <span id="btn-text">Analyze Image</span>
+                    <button id="submit-btn" class="w-full mt-6 bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 px-4 rounded-lg shadow-sm transition-all active:scale-[0.98] flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span id="btn-text">Run the Analysis</span>
                     </button>
                 </div>
-
             </div>
 
             <!-- Right Column: Results -->
             <div class="lg:col-span-7 flex flex-col h-full">
-                <div
-                    class="glass-panel rounded-2xl p-6 shadow-xl flex-grow border-t-4 border-t-indigo-500 flex flex-col">
-                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-700/50">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 text-indigo-400 mr-2" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <h2 class="text-lg font-medium text-slate-100">Analysis Result</h2>
+                <div class="white-panel p-8 flex-grow relative overflow-hidden flex flex-col">
+                    
+                    <h2 class="text-lg font-semibold text-slate-900 mb-6 border-b border-slate-200 pb-3">Diagnostic Results</h2>
+
+                    <div id="empty-state" class="flex-grow flex flex-col items-center justify-center text-slate-400 py-16">
+                        <svg class="w-10 h-10 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <p class="text-base font-medium text-slate-500">Awaiting Input Data</p>
+                        <p class="text-sm mt-1 text-center max-w-sm">Results from the ML model and AI assessment will appear here.</p>
+                    </div>
+
+                    <div id="results-container" class="hidden h-full flex flex-col">
+                        
+                        <!-- ML Model Output -->
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Step 2: Custom ML Model Output</h3>
+                        <div class="ml-card" id="ml-prediction-card">
+                            <div class="flex items-start">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide" id="ml-model-name">CNN Image Model</p>
+                                    <p class="text-xl font-bold text-slate-900" id="ml-diagnosis">Analyzing...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Groq AI Output -->
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-4">Step 3: AI Clinical Advice</h3>
+                        <div class="ai-card flex-grow overflow-y-auto">
+                            <div id="ai-response" class="markdown-body"></div>
                         </div>
                     </div>
-
-                    <div id="empty-state"
-                        class="flex-grow flex flex-col items-center justify-center text-slate-500 py-12">
-                        <svg class="w-16 h-16 mb-4 text-slate-700" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                            </path>
-                        </svg>
-                        <p>Upload an image and submit a query to see the analysis here.</p>
-                    </div>
-
-                    <div id="response-container-llama11b"
-                        class="hidden markdown-body flex-grow overflow-y-auto pr-2 custom-scrollbar"></div>
                 </div>
             </div>
-
         </div>
 
-        <!-- Error Alert -->
-        <div id="error-container"
-            class="hidden max-w-2xl mx-auto mt-6 bg-red-900/30 border border-red-500/30 rounded-xl p-4 flex items-start shadow-lg">
-            <svg class="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+        <div id="error-container" class="hidden max-w-3xl mx-auto mt-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start shadow-sm">
+            <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <div>
-                <h3 class="text-sm font-medium text-red-400">Error processing request</h3>
-                <p id="error-text" class="mt-1 text-sm text-red-200/80"></p>
+                <h3 class="text-sm font-medium text-red-800">Pipeline Error</h3>
+                <p id="error-text" class="mt-1 text-sm text-red-600"></p>
             </div>
         </div>
-
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const uploadBtn = document.getElementById('upload-btn');
-            const uploadZone = document.getElementById('upload-zone');
+            let activeMode = 'image'; // 'image' or 'text'
+            
+            const tabImage = document.getElementById('tab-image');
+            const tabText = document.getElementById('tab-text');
+            const imageSection = document.getElementById('image-section');
+            const textSection = document.getElementById('text-section');
+            
+            const uploadBtn = document.getElementById('upload-zone');
             const imageUpload = document.getElementById('image-upload');
             const displayImage = document.getElementById('display-image');
             const imageContainer = document.getElementById('image-container');
+            
+            const symptomsInput = document.getElementById('symptoms-input');
             const queryInput = document.getElementById('query-input');
-            const submitQuery = document.getElementById('submit-query');
+            const submitBtn = document.getElementById('submit-btn');
             const btnText = document.getElementById('btn-text');
-            const responseLlama = document.getElementById('response-container-llama11b');
+            
             const emptyState = document.getElementById('empty-state');
+            const resultsContainer = document.getElementById('results-container');
+            const mlModelName = document.getElementById('ml-model-name');
+            const mlDiagnosis = document.getElementById('ml-diagnosis');
+            const aiResponse = document.getElementById('ai-response');
+            
             const errorContainer = document.getElementById('error-container');
             const errorText = document.getElementById('error-text');
 
-            // Click triggers
-            const triggerUpload = () => imageUpload.click();
-            uploadBtn.addEventListener('click', (e) => { e.stopPropagation(); triggerUpload(); });
-            uploadZone.addEventListener('click', triggerUpload);
+            // Tab Switching
+            tabImage.addEventListener('click', () => {
+                activeMode = 'image';
+                tabImage.classList.add('active', 'text-slate-900');
+                tabImage.classList.remove('text-slate-500', 'text-slate-600');
+                tabText.classList.remove('active', 'text-slate-900');
+                tabText.classList.add('text-slate-500');
+                imageSection.classList.remove('hidden');
+                textSection.classList.add('hidden');
+            });
 
-            // Display uploaded image
+            tabText.addEventListener('click', () => {
+                activeMode = 'text';
+                tabText.classList.add('active', 'text-slate-900');
+                tabText.classList.remove('text-slate-500', 'text-slate-600');
+                tabImage.classList.remove('active', 'text-slate-900');
+                tabImage.classList.add('text-slate-500');
+                textSection.classList.remove('hidden');
+                imageSection.classList.add('hidden');
+            });
+
+            // Image Upload
+            uploadBtn.addEventListener('click', () => imageUpload.click());
             imageUpload.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (file) {
@@ -257,60 +273,63 @@
                     reader.onload = (e) => {
                         displayImage.src = e.target.result;
                         imageContainer.classList.remove('hidden');
-                        uploadZone.classList.add('hidden');
+                        uploadBtn.classList.add('hidden');
                     };
                     reader.readAsDataURL(file);
                 }
             });
 
-            // Submit Query
-            submitQuery.addEventListener('click', async () => {
-                const image = imageUpload.files[0];
-                const query = queryInput.value.trim();
-
-                if (!image) {
-                    showError('Please select an image to analyze.');
-                    return;
-                }
-                if (!query) {
-                    showError('Please enter a clinical query for the analysis.');
-                    return;
-                }
-
+            // Submit Request
+            submitBtn.addEventListener('click', async () => {
+                errorContainer.classList.add('hidden');
+                const query = queryInput.value.trim() || "What does this diagnosis mean?";
                 const formData = new FormData();
-                formData.append('image', image);
-                formData.append('query', query);
+                let endpoint = '';
+
+                if (activeMode === 'image') {
+                    const image = imageUpload.files[0];
+                    if (!image) return showError('Please upload an image first.');
+                    formData.append('image', image);
+                    formData.append('query', query);
+                    endpoint = '/analyze_image';
+                    mlModelName.textContent = "CNN Image Model Output";
+                } else {
+                    const symptoms = symptomsInput.value.trim();
+                    if (!symptoms) return showError('Please enter symptoms first.');
+                    formData.append('symptoms', symptoms);
+                    formData.append('query', query);
+                    endpoint = '/analyze_text';
+                    mlModelName.textContent = "Random Forest Model Output";
+                }
 
                 try {
-                    submitQuery.disabled = true;
-                    btnText.innerHTML = '<div class="spinner"></div> Processing...';
-                    errorContainer.classList.add('hidden');
+                    submitBtn.disabled = true;
+                    btnText.innerHTML = '<div class="spinner"></div> Processing Analysis...';
+                    
+                    emptyState.classList.add('hidden');
+                    resultsContainer.classList.remove('hidden');
+                    mlDiagnosis.innerHTML = '<span class="text-slate-500 text-base font-normal">Analyzing data...</span>';
+                    aiResponse.innerHTML = '<span class="text-slate-400 font-medium">Awaiting response from clinical AI...</span>';
 
-                    // Reset response area
-                    responseLlama.classList.add('hidden');
-                    emptyState.classList.remove('hidden');
-
-                    const response = await fetch('/upload_and_query', {
-                        method: 'POST',
-                        body: formData
-                    });
-
+                    const response = await fetch(endpoint, { method: 'POST', body: formData });
                     const result = await response.json();
 
-                    if (!response.ok) {
-                        throw new Error(result.detail || 'An error occurred while processing your request.');
-                    }
+                    if (!response.ok) throw new Error(result.detail || 'Analysis failed.');
 
-                    emptyState.classList.add('hidden');
-                    responseLlama.innerHTML = marked.parse(result.llama);
-                    responseLlama.classList.remove('hidden');
+                    // Update ML Results instantly
+                    mlDiagnosis.textContent = result.ml_prediction || "Unknown";
+                    
+                    // Update AI Results
+                    aiResponse.innerHTML = marked.parse(result.llama_response);
 
                 } catch (error) {
                     console.error('Error:', error);
                     showError(error.message);
+                    resultsContainer.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
                 } finally {
-                    submitQuery.disabled = false;
-                    btnText.textContent = 'Analyze Image';
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Run Pipeline Analysis';
                 }
             });
 
@@ -320,27 +339,5 @@
             }
         });
     </script>
-
-    <style>
-        /* Custom scrollbar for results area */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(71, 85, 105, 0.8);
-            border-radius: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.8);
-        }
-    </style>
 </body>
-
 </html>
